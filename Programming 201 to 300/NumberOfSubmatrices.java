@@ -1,69 +1,52 @@
 public class NumberOfSubmatrices {
+
     public static int numSubmat(int[][] mat) {
-        int m = mat.length, n = mat[0].length;
-        int total = 0;
+        if (mat == null || mat.length == 0 || mat[0].length == 0) {
+            return 0;
+        }
+
+        int m = mat.length;
+        int n = mat[0].length;
+        int totalSubmatrices = 0;
+
+        // Step 1: Transform the matrix where each cell mat[i][j] stores
+        // the number of consecutive 1's to its left in the same row.
         for (int i = 0; i < m; i++) {
-            int[] height = new int[n];
-            for (int j = i; j < m; j++) {
-                for (int k = 0; k < n; k++) {
-                    if (mat[j][k] == 1)
-                        height[k] += 1;
-                    else
-                        height[k] = 0;
+            for (int j = 1; j < n; j++) {
+                if (mat[i][j] == 1) {
+                    mat[i][j] += mat[i][j - 1];
                 }
-                total += countSubmatrices1D(height);
             }
         }
-        return total;
+
+        // Step 2: For each cell, treat it as the bottom-right corner of the submatrix
+        // and look upwards to count valid submatrices.
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (mat[i][j] > 0) {
+                    int minWidth = mat[i][j];
+                    // Move up row by row
+                    for (int k = i; k >= 0; k--) {
+                        if (mat[k][j] == 0) {
+                            break; // No more submatrices can be formed above this
+                        }
+                        minWidth = Math.min(minWidth, mat[k][j]);
+                        totalSubmatrices += minWidth;
+                    }
+                }
+            }
+        }
+
+        return totalSubmatrices;
     }
 
-    private static int countSubmatrices1D(int[] h) {
-        int count = 0, sum = 0, curLength = 0;
-        for (int val : h) {
-            if (val > 0) {
-                curLength++;
-            } else {
-                curLength = 0;
-            }
-            sum += curLength;
-        }
-        // Actually need to compute all submatrices with all ones? This is simplified.
-        // Standard solution: for each row, compute heights and then for each column,
-        // count continuous segments.
-        // Here's a correct O(m^2 n) approach: count all submatrices with all 1's.
-        // I'll provide a correct implementation using monotonic stack approach.
-        // Simpler: for each pair of rows, count submatrices with all 1s in between
-        // using histogram.
-        // We'll implement proper counting using the method from LeetCode 1504.
-        // For brevity, I'll implement a correct method:
-        return countAllOneSubmatrices(h);
+    public static void main(String[] args) {
+        int[][] mat = {
+                { 1, 0, 1 },
+                { 1, 1, 0 },
+                { 1, 1, 0 }
+        };
+        // Expected output: 13
+        System.out.println("Total submatrices: " + numSubmat(mat));
     }
-
-    private static int countAllOneSubmatrices(int[] heights) {
-        int n = heights.length;
-        int[] stack = new int[n + 1];
-        int top = -1;
-        int result = 0;
-        for (int i = 0; i <= n; i++) {
-            while (top >= 0 && (i == n || heights[stack[top]] > heights[i])) {
-                int h = heights[stack[top--]];
-                int left = top == -1 ? -1 : stack[top];
-                int len = i - left - 1;
-                // Number of submatrices with height h inside this width?
-                // Actually, the count of submatrices formed by this bar as the minimum height.
-                // Simple formula: sum of (h * (len*(len+1)/2))? Not exactly.
-                // Standard: (h * (h+1)/2) * (len*(len+1)/2) when considering all submatrices?
-                // No.
-                // Correct formula for counting all submatrices of all ones: For each cell as
-                // bottom-right, count.
-                // Will switch to simpler O(m*n) using consecutive ones.
-                // I'll implement a straightforward solution: count submatrices with all ones by
-                // iterating rows and columns.
-            }
-        }
-        // Placeholder return; better to use simple O(m^2*n^2) for clarity? Too large.
-        // I'll replace with proper solution below.
-    }
-    // I'll just provide a working simpler O(m^2 * n) solution that is correct.
-    // Let's replace the whole class with standard code.
 }
