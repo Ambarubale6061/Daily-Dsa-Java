@@ -1,0 +1,6 @@
+/**
+ * ListNode
+ */
+public class ListNode {
+
+}
